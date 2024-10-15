@@ -23,7 +23,8 @@ DoCELTYC(
 \arguments{
 \item{data.m}{A DNAm matrix to perform cell-type specific clustering on. We recommend using a standardized residual matrix adjusted for cell type fractions here, but this is optional.}
 
-\item{dmct.lv}{A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type}
+\item{dmct.lv}{A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type
+(or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.}
 
 \item{method}{Character value. "jive": do JIVE on the input matrix first, and then do consensus clustering;
 "consensus": do consensus clustering directly on the input matrix.}
@@ -34,8 +35,7 @@ DoCELTYC(
 
 \item{pItem}{numerical value. proportion of items to sample.}
 
-\item{pFeature}{numerical value. proportion of features to sample.
-(or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.}
+\item{pFeature}{numerical value. proportion of features to sample.}
 
 \item{title}{character value for a part of the output directory name for consensus clustering (for figures and tables).}
 
