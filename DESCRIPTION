@@ -3,7 +3,7 @@ Title: Cell type specific clustering
 Version: 0.1.0
 Date: 2024-3-25
 Author: Qi Luo, Andrew E. Teschendorff <andrew@sinh.ac.cn>
-Maintainer: Andrew E. Teschendorff <andrew@sinh.ac.cn>
+Maintainer: Qi Luo, Andrew E. Teschendorff <andrew@sinh.ac.cn>
 Description: CELTYC is an R package that implements cell type specific
     clustering pipeline given a DNA methylation data matrix. It includes
     the process of estimating cell type fractions within a tissue type,
@@ -18,6 +18,6 @@ Suggests: BiocStyle, ComplexHeatmap, EpiSCORE, knitr, rmarkdown,
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2024-04-01 16:41:18 UTC; luoqi
+Packaged: 2024-10-15 10:06:41 UTC; luoqi

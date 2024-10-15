@@ -1,7 +1,7 @@
 ## ----chunk1-------------------------------------------------------------------
 knitr::opts_chunk$set(crop = NULL)
 library(CELTYC)
-data(preCompData) # load all the data objects used in the following analysis
+data("LIHC_data") # load the data used in the following analysis
 
 ## ----chunk2, eval=F, echo=T---------------------------------------------------
 #  library(EpiSCORE)
@@ -19,19 +19,26 @@ data(preCompData) # load all the data objects used in the following analysis
 #  sex.v[which(sex.v=="FEMALE")] <- 2
 #  sex.v <- as.numeric(sex.v)
 #  age.v <- pheno.df$age_at_initial_pathologic_diagnosis
-#  na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of GetDMCT does not allow NA in input
+#  na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of CellDMC does not allow NA in input
 #  
 #  cov.mod.use <- model.matrix(~sex.v[-na.idx]+age.v[-na.idx]) # exclude the confounding effect of age and sex
-#  getdmct.res <- GetDMCT(bmiq.m[,-na.idx],pheno.v = phe.v[-na.idx],ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use,ncores = 40)
+#  celldmc.o <- CellDMC(bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],ctf.m = estF.m[-na.idx,],
+#                       mc.cores = 40,ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use)
+#  dmct.lv <- list() # save DMCTs for each cell type
+#  for(ct in colnames(celldmc.o[["dmct"]])[2:ncol(celldmc.o[["dmct"]])]){
+#      dmct.lv[[ct]] <-  rownames(celldmc.o[["dmct"]])[which(celldmc.o[["dmct"]][,ct]!=0)]
+#  }
+#  dmct.res <- list(celldmc_res=celldmc.o,dmct=dmct.lv)
+#  
 
 ## ----chunk4, message=F--------------------------------------------------------
 library(SuperExactTest)
-supertest.o <- supertest(allDMCT,n=403197)
+supertest.o <- supertest(LIHC_data$allDMCT,n=403197)
 plot(supertest.o,"landscape",sort.by = "size",color.scale.cex = 0.7,overlap.size.cex = 0.6,cex=0.7)
 
-## ----chunk5,echo=T,eval=T-----------------------------------------------------
-res.m <- GetResidualMat(LIHC_DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40) # regress out CTFs from DNAm matrix and get standardized residual matrix
-CELTYC.results.l <- DoCtsCluster(res.m,method = "consensus",maxK = 3,dmct.lv = selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
+## ----chunk5,echo=T------------------------------------------------------------
+res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T,ncores = 40) # regress out CTFs from DNAm matrix and get standardized residual matrix
+CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_data$selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
 
 ## ----chunk6,message=F---------------------------------------------------------
 library(ComplexHeatmap)
@@ -45,7 +52,7 @@ table(lym.clust.v,ec.clust.v)
 print("Compare the hep-clusters and EC-clusters:")
 table(hep.clust.v,ec.clust.v)
 
-ComplexHeatmap::draw(clustHeatmap)
+ComplexHeatmap::draw(LIHC_data$heatmap)
 
 ## ----chunk7-------------------------------------------------------------------
 library(survival)
@@ -63,8 +70,8 @@ for(m in 1:3){
   # generate pairwise P values comparing survival probability between different clusters
   for(i in 1:(count-1)){
     for(j in (i+1):count){
-      tmp.time <- LIHC_pheno$OS.time[clust.v %in% c(cl[i],cl[j])]
-      tmp.event <- LIHC_pheno$event[clust.v %in% c(cl[i],cl[j])]
+      tmp.time <- LIHC_data$pheno$OS.time[clust.v %in% c(cl[i],cl[j])]
+      tmp.event <- LIHC_data$pheno$event[clust.v %in% c(cl[i],cl[j])]
       tmp.clust.v <- clust.v[clust.v %in% c(cl[i],cl[j])]
       surv.o <- Surv(time = tmp.time,event = tmp.event)
       cox.o <- coxph(surv.o~tmp.clust.v)
@@ -75,7 +82,7 @@ for(m in 1:3){
   }  
   names(chi.surv.p.v) <- tmp.v
   # generate overall KM-curve plot to see the difference of survival rate between clusters
-  surv.o <- Surv(time = LIHC_pheno$OS.time,event = LIHC_pheno$event)
+  surv.o <- Surv(time = LIHC_data$pheno$OS.time,event = LIHC_data$pheno$event)
   survfit.o <- survfit(surv.o ~ clust.v) 
   surv.res.l[[m]] <- list()
   surv.res.l[[m]][["pair-Pval"]] <- chi.surv.p.v
@@ -101,8 +108,8 @@ text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[3]]$`pair-Pval`)[1]," Chisq P
 
 
 ## ----chunk8, eval=F,echo=T----------------------------------------------------
-#  res.m <- GetResidualMat(bmiq.m[,cancer.idx],estCTF.m = LIHC_estF,standardize = T,ncores = 40)
-#  jive.results.l <- DoCtsCluster(res.m,method = "jive",maxK = 5,dmct.lv = selDMCT,title = "cluster-test")
+#  res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40)
+#  jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = selDMCT,title = "cluster-test")
 #  jive.clust.v <- jive.results.l$Lym[[3]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
 #  
 

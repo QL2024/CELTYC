@@ -24,13 +24,13 @@ Here we propose a novel strategy, based on the concept of “cell-type specific 
 
 
 # Tutorial Example
-In order to run the tutorial we must first load the necessary package and data.
+In order to run the tutorial we must first load the necessary package and data. We have saved all the necessary data objects in a list named `LIHC_data`.
 
 ## Loading in the data
 ```{r chunk1}
 knitr::opts_chunk$set(crop = NULL)
 library(CELTYC)
-data(preCompData) # load all the data objects used in the following analysis
+data("LIHC_data") # load the data used in the following analysis
 ```
 
 ## Estimating cell-type fractions for the LIHC samples
@@ -44,7 +44,7 @@ estF.m <- estF.o$estF
 ```
 
 ## Identifying cell-type specific differentially methylated CpGs (DMCTs)
-Next, we want to identify DMCTs with a function `GetDMCT()` which employs the previously published CellDMC algorithm (`EpiDISH::CellDMC()`). Running `GetDMCT()` requires the input of abovementioned matrix `bmiq.m`, and the use of the phenotype information (`pheno.df`, a data.frame with rows matched for `bmiq.m`), and again here we only display the syntax: 
+Next, we want to identify DMCTs employing the previously published CellDMC algorithm (`EpiDISH::CellDMC()`). Running `EpiDISH::CellDMC` requires the input of abovementioned matrix `bmiq.m`, and the use of the phenotype information (`pheno.df`, a data.frame with rows matched for `bmiq.m`), and again here we only display the syntax: 
 ```{r chunk3, eval=F, echo=T}
 phe.v <- pheno.df$cancer # the cancer status for samples
 phe.v[which(phe.v=="Cancer")] <- 1
@@ -55,25 +55,32 @@ sex.v[which(sex.v=="MALE")] <- 1
 sex.v[which(sex.v=="FEMALE")] <- 2
 sex.v <- as.numeric(sex.v)
 age.v <- pheno.df$age_at_initial_pathologic_diagnosis
-na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of GetDMCT does not allow NA in input
+na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of CellDMC does not allow NA in input
 
 cov.mod.use <- model.matrix(~sex.v[-na.idx]+age.v[-na.idx]) # exclude the confounding effect of age and sex
-getdmct.res <- GetDMCT(bmiq.m[,-na.idx],pheno.v = phe.v[-na.idx],ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use,ncores = 40)
+celldmc.o <- CellDMC(bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],ctf.m = estF.m[-na.idx,],
+                     mc.cores = 40,ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use)
+dmct.lv <- list() # save DMCTs for each cell type
+for(ct in colnames(celldmc.o[["dmct"]])[2:ncol(celldmc.o[["dmct"]])]){
+    dmct.lv[[ct]] <-  rownames(celldmc.o[["dmct"]])[which(celldmc.o[["dmct"]][,ct]!=0)]
+}
+dmct.res <- list(celldmc_res=celldmc.o,dmct=dmct.lv)
+
 ```
 
-`getdmct.res` contains 2 list objects. The 1st list is the returned result of `EpiDISH::CellDMC()`, and the 2nd one is a list of identified DMCTs for each cell type. We have saved the  2nd list `getdmct.res$dmct` as `dataDMCT`. To visualize the number of DMCTs for each cell-type and their overlaps, we can run: 
+`dmct.res` contains 2 list objects. The 1st list is the returned result of `EpiDISH::CellDMC()`, and the 2nd one is a list of identified DMCTs for each cell type. We have saved the  2nd list `dmct.res$dmct` as `LIHC_data$allDMCT`. To visualize the number of DMCTs for each cell-type and their overlaps, we can run: 
 ```{r chunk4, message=F}
 library(SuperExactTest)
-supertest.o <- supertest(allDMCT,n=403197)
+supertest.o <- supertest(LIHC_data$allDMCT,n=403197)
 plot(supertest.o,"landscape",sort.by = "size",color.scale.cex = 0.7,overlap.size.cex = 0.6,cex=0.7)
 ```
 
 ## Performing cell-type specific clustering
-Now that we have identified cell-type specific methylation CpG sites associated with cancer status, we can perform cell-type specific clustering on DNAm data over different sets of DMCTs for cancer-status samples, after we regress out estimated CTF. Here we can use the prepared DNAm matrix over a subset of CPG probes `LIHC_DNAm` and the cell-type fraction matrix `LIHC_estF` with matched samples to `LIHC_DNAm` for further analysis. We now try to do clustering restricting to 3 sets of DMCTs (retrieved by loading a list object `selDMCT`): DMCTs exclusively altered with disease status in lymphocytes, hepatocytes and endothelial cells respectively. 
+Now that we have identified cell-type specific methylation CpG sites associated with cancer status, we can perform cell-type specific clustering on DNAm data over different sets of DMCTs for cancer-status samples, after we regress out estimated CTF. Here we can use the prepared DNAm matrix over a subset of CPG probes `LIHC_data$DNAm` and the cell-type fraction matrix `LIHC_data$estF` with matched samples to `LIHC_data$DNAm` for further analysis. We now try to do clustering restricting to 3 sets of DMCTs (stored in a list object `LIHC_data$selDMCT`): DMCTs exclusively altered with disease status in lymphocytes, hepatocytes and endothelial cells respectively. 
 
-```{r chunk5,echo=T,eval=T}
-res.m <- GetResidualMat(LIHC_DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40) # regress out CTFs from DNAm matrix and get standardized residual matrix
-CELTYC.results.l <- DoCtsCluster(res.m,method = "consensus",maxK = 3,dmct.lv = selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
+```{r chunk5,echo=T}
+res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T,ncores = 40) # regress out CTFs from DNAm matrix and get standardized residual matrix
+CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_data$selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
 ```
 
 We can check the sample composition of clustering results using DMCTs for different cell types, and generate a heatmap of scaled residual matrix labeled with cluster index. We can look at the pre-generated heatmap `clustHeatmap` here: 
@@ -89,11 +96,11 @@ table(lym.clust.v,ec.clust.v)
 print("Compare the hep-clusters and EC-clusters:")
 table(hep.clust.v,ec.clust.v)
 
-ComplexHeatmap::draw(clustHeatmap)
+ComplexHeatmap::draw(LIHC_data$heatmap)
 ```
 
 ## Performing survival analysis for CELTYC clusters
-Next we want to see whether the newly obtained clusters using different sets of DMCTs are significantly associated with overall survival. We use the prepared `data.frame` object named `LIHC_pheno` storing the phenotype information including O.S. time and death event:
+Next we want to see whether the newly obtained clusters using different sets of DMCTs are significantly associated with overall survival. We use the prepared `data.frame` object `LIHC_data$pheno` storing the phenotype information including O.S. time and death event:
 ```{r chunk7}
 library(survival)
 
@@ -110,8 +117,8 @@ for(m in 1:3){
   # generate pairwise P values comparing survival probability between different clusters
   for(i in 1:(count-1)){
     for(j in (i+1):count){
-      tmp.time <- LIHC_pheno$OS.time[clust.v %in% c(cl[i],cl[j])]
-      tmp.event <- LIHC_pheno$event[clust.v %in% c(cl[i],cl[j])]
+      tmp.time <- LIHC_data$pheno$OS.time[clust.v %in% c(cl[i],cl[j])]
+      tmp.event <- LIHC_data$pheno$event[clust.v %in% c(cl[i],cl[j])]
       tmp.clust.v <- clust.v[clust.v %in% c(cl[i],cl[j])]
       surv.o <- Surv(time = tmp.time,event = tmp.event)
       cox.o <- coxph(surv.o~tmp.clust.v)
@@ -122,7 +129,7 @@ for(m in 1:3){
   }  
   names(chi.surv.p.v) <- tmp.v
   # generate overall KM-curve plot to see the difference of survival rate between clusters
-  surv.o <- Surv(time = LIHC_pheno$OS.time,event = LIHC_pheno$event)
+  surv.o <- Surv(time = LIHC_data$pheno$OS.time,event = LIHC_data$pheno$event)
   survfit.o <- survfit(surv.o ~ clust.v) 
   surv.res.l[[m]] <- list()
   surv.res.l[[m]][["pair-Pval"]] <- chi.surv.p.v
@@ -150,10 +157,10 @@ text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[3]]$`pair-Pval`)[1]," Chisq P
 The results we obtain show that CELTYC enables us to divide LIHC samples into different clusters with clear segregation of survival rate when we use DMCTs specific to lymphocytes. However, no distinguishable segregation was observed when employing DMCTs specific to the other two cell types.
 
 ## Performing cell-type specific clustering with an alternative method ("jive")
-In the example above we  do consensus clustering directly on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells, by setting the parameter "method" to be "consensus" in function `DoCtsCluster()`, but meanwhile we can also implement a statistical procedure called JIVE (Joint and Individual Variation Explained) that extracts out components of joint variation across all data matrices as well as components of individual variation that are unique to each cell-type or unique to specific combinations of cell-types, utilizing an R-package `r.jive`. To conduct jive analysis, one needs to prepare separate matrices with non-overlapping features, and in this case we can use the prepared list `selDMCT` which stores the DMCTs for lymphocytes, hepatocytes and endothelials that are not shared by other two cell types, and also DMCTs shared by all three cell types. For the original DNAm matrix `bmiq.m` is too large, we only display the syntax for this method here:
+In the example above we  do consensus clustering directly on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells, by setting the parameter "method" to be "consensus" in function `DoCELTYC()`, but meanwhile we can also implement a statistical procedure called JIVE (Joint and Individual Variation Explained) that extracts out components of joint variation across all data matrices as well as components of individual variation that are unique to each cell-type or unique to specific combinations of cell-types, utilizing an R-package `r.jive`. To conduct jive analysis, one needs to prepare separate matrices with non-overlapping features, and in this case we can use the prepared list `LIHC_data$selDMCT` which stores the DMCTs for lymphocytes, hepatocytes and endothelials that are not shared by other two cell types, and also DMCTs shared by all three cell types. To save the running time, we only display the syntax for this method here:
 ```{r chunk8, eval=F,echo=T}
-res.m <- GetResidualMat(bmiq.m[,cancer.idx],estCTF.m = LIHC_estF,standardize = T,ncores = 40)
-jive.results.l <- DoCtsCluster(res.m,method = "jive",maxK = 5,dmct.lv = selDMCT,title = "cluster-test")
+res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40)
+jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = selDMCT,title = "cluster-test")
 jive.clust.v <- jive.results.l$Lym[[3]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
 
 ```
