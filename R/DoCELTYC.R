@@ -9,13 +9,14 @@
 #'
 #' @param data.m A DNAm matrix to perform cell-type specific clustering on. We recommend using a standardized residual matrix adjusted for cell type fractions here, but this is optional.
 #' @param dmct.lv A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type
+#' (or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.
+#'
 #' @param method Character value. "jive": do JIVE on the input matrix first, and then do consensus clustering;
 #' "consensus": do consensus clustering directly on the input matrix.
 #' @param maxK integer value. maximum cluster number to evaluate.
 #' @param reps integer value. number of subsamples.
 #' @param pItem numerical value. proportion of items to sample.
 #' @param pFeature numerical value. proportion of features to sample.
-#' (or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.
 #' @param title character value for a part of the output directory name for consensus clustering (for figures and tables).
 #' @param clusterAlg 	character value. cluster algorithm.
 #' 'hc' hierarchical (hclust), 'pam' for paritioning around medoids, 'km' for k-means upon data matrix, or a function that returns a clustering.
