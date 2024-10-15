@@ -10,6 +10,7 @@ data("LIHC_data") # load the data used in the following analysis
 #  estF.m <- estF.o$estF
 
 ## ----chunk3, eval=F, echo=T---------------------------------------------------
+#  library(EpiDISH)
 #  phe.v <- pheno.df$cancer # the cancer status for samples
 #  phe.v[which(phe.v=="Cancer")] <- 1
 #  phe.v[which(phe.v=="Normal")] <- 0
@@ -22,8 +23,8 @@ data("LIHC_data") # load the data used in the following analysis
 #  na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of CellDMC does not allow NA in input
 #  
 #  cov.mod.use <- model.matrix(~sex.v[-na.idx]+age.v[-na.idx]) # exclude the confounding effect of age and sex
-#  celldmc.o <- CellDMC(bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],ctf.m = estF.m[-na.idx,],
-#                       mc.cores = 40,ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use)
+#  celldmc.o <- CellDMC(beta.m = bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],frac.m  = estF.m[-na.idx,],
+#                       mc.cores = 40,cov.mod = cov.mod.use)
 #  dmct.lv <- list() # save DMCTs for each cell type
 #  for(ct in colnames(celldmc.o[["dmct"]])[2:ncol(celldmc.o[["dmct"]])]){
 #      dmct.lv[[ct]] <-  rownames(celldmc.o[["dmct"]])[which(celldmc.o[["dmct"]][,ct]!=0)]
@@ -108,9 +109,9 @@ text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[3]]$`pair-Pval`)[1]," Chisq P
 
 
 ## ----chunk8, eval=F,echo=T----------------------------------------------------
-#  res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40)
-#  jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = selDMCT,title = "cluster-test")
-#  jive.clust.v <- jive.results.l$Lym[[3]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
+#  res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T,ncores = 40)
+#  jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = LIHC_data$selDMCT,title = "cluster-test")
+#  jive.clust.v <- jive.results.l$Lym[[2]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
 #  
 
 ## ----sessionInfo, eval=T, echo=T----------------------------------------------

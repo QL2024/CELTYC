@@ -46,6 +46,7 @@ estF.m <- estF.o$estF
 ## Identifying cell-type specific differentially methylated CpGs (DMCTs)
 Next, we want to identify DMCTs employing the previously published CellDMC algorithm (`EpiDISH::CellDMC()`). Running `EpiDISH::CellDMC` requires the input of abovementioned matrix `bmiq.m`, and the use of the phenotype information (`pheno.df`, a data.frame with rows matched for `bmiq.m`), and again here we only display the syntax: 
 ```{r chunk3, eval=F, echo=T}
+library(EpiDISH)
 phe.v <- pheno.df$cancer # the cancer status for samples
 phe.v[which(phe.v=="Cancer")] <- 1
 phe.v[which(phe.v=="Normal")] <- 0
@@ -58,8 +59,8 @@ age.v <- pheno.df$age_at_initial_pathologic_diagnosis
 na.idx <- which(is.na(age.v)|is.na(sex.v)) # the running of CellDMC does not allow NA in input
 
 cov.mod.use <- model.matrix(~sex.v[-na.idx]+age.v[-na.idx]) # exclude the confounding effect of age and sex
-celldmc.o <- CellDMC(bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],ctf.m = estF.m[-na.idx,],
-                     mc.cores = 40,ctf.m = estF.m[-na.idx,],cov.mod = cov.mod.use)
+celldmc.o <- CellDMC(beta.m = bmiq.m[,-na.idx],pheno.v=phe.v[-na.idx],frac.m  = estF.m[-na.idx,],
+                     mc.cores = 40,cov.mod = cov.mod.use)
 dmct.lv <- list() # save DMCTs for each cell type
 for(ct in colnames(celldmc.o[["dmct"]])[2:ncol(celldmc.o[["dmct"]])]){
     dmct.lv[[ct]] <-  rownames(celldmc.o[["dmct"]])[which(celldmc.o[["dmct"]][,ct]!=0)]
@@ -159,9 +160,9 @@ The results we obtain show that CELTYC enables us to divide LIHC samples into di
 ## Performing cell-type specific clustering with an alternative method ("jive")
 In the example above we  do consensus clustering directly on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells, by setting the parameter "method" to be "consensus" in function `DoCELTYC()`, but meanwhile we can also implement a statistical procedure called JIVE (Joint and Individual Variation Explained) that extracts out components of joint variation across all data matrices as well as components of individual variation that are unique to each cell-type or unique to specific combinations of cell-types, utilizing an R-package `r.jive`. To conduct jive analysis, one needs to prepare separate matrices with non-overlapping features, and in this case we can use the prepared list `LIHC_data$selDMCT` which stores the DMCTs for lymphocytes, hepatocytes and endothelials that are not shared by other two cell types, and also DMCTs shared by all three cell types. To save the running time, we only display the syntax for this method here:
 ```{r chunk8, eval=F,echo=T}
-res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_estF,standardize = T,ncores = 40)
-jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = selDMCT,title = "cluster-test")
-jive.clust.v <- jive.results.l$Lym[[3]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
+res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T,ncores = 40)
+jive.results.l <- DoCELTYC(res.m,method = "jive",maxK = 3,dmct.lv = LIHC_data$selDMCT,title = "cluster-test")
+jive.clust.v <- jive.results.l$Lym[[2]]$consensusClass # extract the clustering results on JIVE-derived individual matrix for lymphocyte-specific DMCTs, when cluster number=3
 
 ```
 
