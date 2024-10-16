@@ -26,7 +26,7 @@ DoCELTYC(
 \item{dmct.lv}{A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type
 (or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.}
 
-\item{method}{Character value. "jive": do JIVE on the input matrix first, and then do consensus clustering;
+\item{method}{Character value. "jive": do JIVE analysis (with `r.jive::jive()`) on the input matrix first, and then do consensus clustering;
 "consensus": do consensus clustering directly on the input matrix.}
 
 \item{maxK}{integer value. maximum cluster number to evaluate.}
@@ -51,20 +51,27 @@ DoCELTYC(
 \item{writeTable}{logical value. TRUE - write ouput and log to csv.}
 }
 \value{
-A list of length the same as length of dmct.lv or (length(dmct.lv)+2).
-Each element is a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class asssignments).
+A list of length the same as length of dmct.lv if method is "consensus", or length(dmct.lv)+2 if method is "jive".
+For "consensus" method: each entry is the consensus clustering results, a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
+For "jive" method: the 1st entry is the jive analysis result, i.e. an object of class jive (\code{\link[r.jive]{jive}}); each of the rest entries
+is the consensus clustering results, as in "consensus" method.
 }
 \description{
 This function performs cell-type-specific clustering on input DNAm matrix.
 }
 \details{
 This function helps to do cell type specific clustering with 2 optional methods:
-(1)"jive": By doing JIVE analysis first with input matrices over different sets of DMCs unique to different cell types
-or shared by multiple cell types, one can obtain joint variation shared by various cell types and individual variation unique to each cell type. Note that when using "jive" method, there should be **NO COMMON**
-CpG probes in each entry of dmct.lv. Later consensus clustering will be performed on the joint variation matrix and different individual variation matrices derived from jive analysis. With this method the function returns
-a list with length equal to `length(dmct.lv) + 2`: The 1st entry is the jive analysis result, and the rest are the clustering results using joint variation (the 2nd entry) and individual variation matrices.
-(2)"consensus": When using this method,
+\itemize{
+\item {jive}: By doing JIVE analysis first with input matrices over different sets of DMCs unique to different cell types
+      or shared by multiple cell types, one can obtain joint variation shared by the input DMC sets and individual variation unique to each DMC set.
+      Note that when using "jive" method, there should be \strong{NO COMMON} CpG probes in each entry of dmct.lv.
+      Later consensus clustering will be performed on the joint variation matrix and different individual variation matrices derived from jive analysis.
+      With this method the function returns a list with length equal to `length(dmct.lv) + 2`:
+      The 1st entry is the jive analysis result, and the rest are the clustering results using joint variation (the 2nd entry) and individual variation matrices.
+\item {consensus}: When using this method,
 it is not necessary for the CpGs within each entry of dmct.lv to be completely non-overlapping.
+
+}
 }
 \examples{
 \dontrun{
