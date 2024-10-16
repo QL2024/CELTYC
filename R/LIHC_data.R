@@ -30,6 +30,11 @@
 #'   for a heatmap of standardized residual matrix over lymphocyte specific DMCTs,
 #'   annotated by CELTYC clustering results using lymphocyte specific DMCTs, Hep specific DMCTs and EC specific DMCTs respectively.
 #'   }
+#'   \item{jive_IV_lym}{
+#'   A list for consensus clustering results (\code{\link[ConsensusClusterPlus]{ConsensusClusterPlus}}). It is obtained by running `DoCELTYC()` using "jive" method.
+#'   This list specifically stores the results of doing clustering for individual variation matrix for lymphocyte specific DMCTs.
+#'   This is a list of length 3 (which is the max cluster number). Each entry in it is a list containing consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
+#'   }
 #' }
 #' @name LIHC_data
 #'
