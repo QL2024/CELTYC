@@ -87,12 +87,12 @@ res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T
 CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_data$selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
 ```
 
-We can check whether the clusters obtained by using DMCTs for different cell types are different. We can look at the pre-generated heatmap `clustHeatmap` displaying the standardized residual matrix annotated by the clustering assignments obtained by using DMCTs for different cell types: 
+We can check whether the clusters obtained by using DMCTs specific to different cell types are different. We can look at the pre-generated heatmap `LIHC_data$heatmap` displaying the standardized residual matrix annotated by the clustering assignments obtained by using DMCTs specific to different cell types: 
 ```{r chunk6,message=F}
 library(ComplexHeatmap)
 lym.clust.v <- CELTYC.results.l$Lym[[3]]$consensusClass
 hep.clust.v <- CELTYC.results.l$Hep[[3]]$consensusClass
-ec.clust.v <- CELTYC.results.l$EC[[2]]$consensusClass # if K=3, the 3rd cluster contains few samples
+ec.clust.v <- CELTYC.results.l$EC[[2]]$consensusClass # if the chosen cluster number is 3, the 3rd cluster contains few samples
 print("Compare the lym-clusters and hep-clusters:")
 table(lym.clust.v,hep.clust.v)
 print("Compare the lym-clusters and EC-clusters:")
