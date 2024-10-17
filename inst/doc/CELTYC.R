@@ -44,7 +44,7 @@ CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_
 library(ComplexHeatmap)
 lym.clust.v <- CELTYC.results.l$Lym[[3]]$consensusClass
 hep.clust.v <- CELTYC.results.l$Hep[[3]]$consensusClass
-ec.clust.v <- CELTYC.results.l$EC[[2]]$consensusClass # if K=3, the 3rd cluster contains few samples
+ec.clust.v <- CELTYC.results.l$EC[[2]]$consensusClass # if the chosen cluster number is 3, the 3rd cluster contains few samples
 print("Compare the lym-clusters and hep-clusters:")
 table(lym.clust.v,hep.clust.v)
 print("Compare the lym-clusters and EC-clusters:")
