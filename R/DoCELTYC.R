@@ -7,35 +7,36 @@
 #'
 #' @aliases DoCELTYC
 #'
-#' @param data.m A DNAm matrix to perform cell-type specific clustering on. We recommend using a standardized residual matrix adjusted for cell type fractions here, but this is optional.
-#' @param dmct.lv A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type
-#' (or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.
+#' @param data.m A DNAm matrix on which to perform cell-type-specific clustering. A standardized residual matrix adjusted for cell type fractions is recommended here, but this is optional.
+#' @param dmct.lv A list object where each entry is a character vector of DMCTs (CpG probes).
+#' The DMCT vector can be DMCTs for a specific cell type or a set of DMCTs shared among different cell types.
+#' Please note that each entry should be assigned a name.
 #'
-#' @param method Character value. "jive": do JIVE analysis (with `r.jive::jive()`) on the input matrix first, and then do consensus clustering;
+#' @param method Character value. "jive": do JIVE analysis (with \code{\link[r.jive]{jive}}) on the input matrix first, and then do consensus clustering;
 #' "consensus": do consensus clustering directly on the input matrix.
-#' @param maxK integer value. maximum cluster number to evaluate.
-#' @param reps integer value. number of subsamples.
-#' @param pItem numerical value. proportion of items to sample.
-#' @param pFeature numerical value. proportion of features to sample.
-#' @param title character value for a part of the output directory name for consensus clustering (for figures and tables).
-#' @param clusterAlg 	character value. cluster algorithm.
-#' 'hc' hierarchical (hclust), 'pam' for paritioning around medoids, 'km' for k-means upon data matrix, or a function that returns a clustering.
-#' @param distance 	character value. 'pearson': (1 - Pearson correlation), 'spearman' (1 - Spearman correlation), 'euclidean', 'binary', 'maximum', 'canberra', 'minkowski" or custom distance function.
-#' @param seed 	optional numerical value. sets random seed for reproducible results.
-#' @param plot character value. NULL - print to screen, 'pdf', 'png', 'pngBMP' for bitmap png, helpful for large datasets.
-#' @param writeTable 	logical value. TRUE - write ouput and log to csv.
+#' @param maxK Integer value. maximum cluster number to evaluate.
+#' @param reps Integer value. number of subsamples.
+#' @param pItem Numerical value. proportion of items to sample.
+#' @param pFeature Numerical value. proportion of features to sample.
+#' @param title Character value used as part of the output directory name for consensus clustering (for figures and tables).
+#' @param clusterAlg 	Character value indicating cluster algorithm.
+#' 'hc' for hierarchical (hclust), 'pam' for paritioning around medoids, 'km' for k-means upon data matrix, or a function that returns a clustering.
+#' @param distance 	Character value indicating the distance measure to be used. 'pearson': (1 - Pearson correlation), 'spearman' (1 - Spearman correlation), 'euclidean', 'binary', 'maximum', 'canberra', 'minkowski" or custom distance function.
+#' @param seed 	Optional numerical value. Sets random seed for reproducible results.
+#' @param plot Character value. NULL - print to screen, 'pdf', 'png', 'pngBMP' for bitmap png, helpful for large datasets.
+#' @param writeTable 	Logical value. TRUE - write ouput and log to csv.
 #' @details
-#' This function helps to do cell type specific clustering with 2 optional methods:
+#' This function helps to do cell-type-specific clustering with 2 optional methods:
 #' \itemize{
-#' \item {jive}: By doing JIVE analysis first with input matrices over different sets of DMCs unique to different cell types
-#'       or shared by multiple cell types, one can obtain joint variation shared by the input DMC sets and individual variation unique to each DMC set.
-#'       Note that when using "jive" method, there should be \strong{NO COMMON} CpG probes in each entry of dmct.lv.
+#' \item {jive}: By doing JIVE analysis first on the input matrices over different sets of DMCTs, one can obtain joint variation shared by the input DMCT sets
+#'       and individual variation unique to each DMCT set.
+#'       Note that when using "jive" method, there should be \strong{no overlapping} CpGs between every two entries of dmct.lv.
 #'       Later consensus clustering will be performed on the joint variation matrix and different individual variation matrices derived from jive analysis.
 #'       With this method the function returns a list with length equal to `length(dmct.lv) + 2`:
-#'       The 1st entry is the jive analysis result, and the rest are the clustering results using joint variation (the 2nd entry) and individual variation matrices.
+#'       The 1st entry contains the jive analysis result, and the rest contain the clustering results using joint variation (the 2nd entry) and individual variation matrices.
 #' \item {consensus}: When using this method,
-#' it is not necessary for the CpGs within each entry of dmct.lv to be completely non-overlapping.
-#'
+#' it is not necessary for the CpGs within each entry of "dmct.lv" to be completely non-overlapping. Consensus clustering will be performed directly on the input data matrix.
+#' With this method the function returns a list with the same length as "dmct.lv", with each entry containing the consensus clustering results using different DMCT sets in "dmct.lv".
 #' }
 #'
 #' @examples
@@ -45,10 +46,14 @@
 #'  test.results.l <- DoCELTYC(res.m,dmct.lv = LIHC_data$selDMCT[c("Lym")],method = "consensus",maxK = 3,title = "test")
 #' }
 #'
-#' @return A list of length the same as length of dmct.lv if method is "consensus", or length(dmct.lv)+2 if method is "jive".
-#' For "consensus" method: each entry is the consensus clustering results, a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
-#' For "jive" method: the 1st entry is the jive analysis result, i.e. an object of class jive (\code{\link[r.jive]{jive}}); each of the rest entries
-#' is the consensus clustering results, as in "consensus" method.
+#' @return
+#' A list of the same length as the input dmct.lv if the method is "consensus", or length(dmct.lv)+2 if method is "jive".
+#' \itemize{
+#' \item{For "consensus" method}: each entry contains the consensus clustering result using the DMCTs in each entry of "dmct.lv",
+#' represented as a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
+#' \item{For "jive" method}: the 1st entry is the jive analysis result, i.e. an object of class jive (\code{\link[r.jive]{jive}});
+#' each subsequent entry contains the consensus clustering results, as in "consensus" method.
+#' }
 #'
 #' @export
 #'

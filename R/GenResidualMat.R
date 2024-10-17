@@ -2,16 +2,16 @@
 #'
 #' @description
 #' This is a function to regress out estimated cell type fractions from the original DNAm data,
-#' i.e. the beta matrix.
+#' i.e. the beta value matrix.
 #'
 #' @param beta.m
-#' A beta matrix, with rows representing CpG sites and columns representing samples.
+#' A beta value matrix, with rows representing CpG sites and columns representing samples.
 #'
 #' @param standardize
-#' A boolean value to determine whether to do standardization (zero-mean and unit-variance) for the residual matrix.
+#' A boolean value to determine whether to apply z-score standardization (zero-mean and unit-variance) to the residual matrix.
 #' Default is TRUE.
 #' @param estCTF.m
-#' A matrix of cell type fractions, with columns representing cell types and rows representing samples.
+#' A matrix of cell-type fractions, with columns representing cell types and rows representing samples.
 #' @param ncores
 #' The number of cores to use, i.e. at most how many child processes will be run simultaneously.
 #'
