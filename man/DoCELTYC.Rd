@@ -21,56 +21,60 @@ DoCELTYC(
 )
 }
 \arguments{
-\item{data.m}{A DNAm matrix to perform cell-type specific clustering on. We recommend using a standardized residual matrix adjusted for cell type fractions here, but this is optional.}
+\item{data.m}{A DNAm matrix on which to perform cell-type-specific clustering. A standardized residual matrix adjusted for cell type fractions is recommended here, but this is optional.}
 
-\item{dmct.lv}{A list object. Each entry is a character vector of DMCs (CpG names) for a specific cell type
-(or a set of DMCs shared by different cell types) to be used. Note that each entry should be given a name.}
+\item{dmct.lv}{A list object where each entry is a character vector of DMCTs (CpG probes).
+The DMCT vector can be DMCTs for a specific cell type or a set of DMCTs shared among different cell types.
+Please note that each entry should be assigned a name.}
 
-\item{method}{Character value. "jive": do JIVE analysis (with `r.jive::jive()`) on the input matrix first, and then do consensus clustering;
+\item{method}{Character value. "jive": do JIVE analysis (with \code{\link[r.jive]{jive}}) on the input matrix first, and then do consensus clustering;
 "consensus": do consensus clustering directly on the input matrix.}
 
-\item{maxK}{integer value. maximum cluster number to evaluate.}
+\item{maxK}{Integer value. maximum cluster number to evaluate.}
 
-\item{reps}{integer value. number of subsamples.}
+\item{reps}{Integer value. number of subsamples.}
 
-\item{pItem}{numerical value. proportion of items to sample.}
+\item{pItem}{Numerical value. proportion of items to sample.}
 
-\item{pFeature}{numerical value. proportion of features to sample.}
+\item{pFeature}{Numerical value. proportion of features to sample.}
 
-\item{title}{character value for a part of the output directory name for consensus clustering (for figures and tables).}
+\item{title}{Character value used as part of the output directory name for consensus clustering (for figures and tables).}
 
-\item{clusterAlg}{character value. cluster algorithm.
-'hc' hierarchical (hclust), 'pam' for paritioning around medoids, 'km' for k-means upon data matrix, or a function that returns a clustering.}
+\item{clusterAlg}{Character value indicating cluster algorithm.
+'hc' for hierarchical (hclust), 'pam' for paritioning around medoids, 'km' for k-means upon data matrix, or a function that returns a clustering.}
 
-\item{distance}{character value. 'pearson': (1 - Pearson correlation), 'spearman' (1 - Spearman correlation), 'euclidean', 'binary', 'maximum', 'canberra', 'minkowski" or custom distance function.}
+\item{distance}{Character value indicating the distance measure to be used. 'pearson': (1 - Pearson correlation), 'spearman' (1 - Spearman correlation), 'euclidean', 'binary', 'maximum', 'canberra', 'minkowski" or custom distance function.}
 
-\item{seed}{optional numerical value. sets random seed for reproducible results.}
+\item{seed}{Optional numerical value. Sets random seed for reproducible results.}
 
-\item{plot}{character value. NULL - print to screen, 'pdf', 'png', 'pngBMP' for bitmap png, helpful for large datasets.}
+\item{plot}{Character value. NULL - print to screen, 'pdf', 'png', 'pngBMP' for bitmap png, helpful for large datasets.}
 
-\item{writeTable}{logical value. TRUE - write ouput and log to csv.}
+\item{writeTable}{Logical value. TRUE - write ouput and log to csv.}
 }
 \value{
-A list of length the same as length of dmct.lv if method is "consensus", or length(dmct.lv)+2 if method is "jive".
-For "consensus" method: each entry is the consensus clustering results, a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
-For "jive" method: the 1st entry is the jive analysis result, i.e. an object of class jive (\code{\link[r.jive]{jive}}); each of the rest entries
-is the consensus clustering results, as in "consensus" method.
+A list of the same length as the input dmct.lv if the method is "consensus", or length(dmct.lv)+2 if method is "jive".
+\itemize{
+\item{For "consensus" method}: each entry contains the consensus clustering result using the DMCTs in each entry of "dmct.lv",
+represented as a list of length maxK, and each internal list contains consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass (consensus class assignments).
+\item{For "jive" method}: the 1st entry is the jive analysis result, i.e. an object of class jive (\code{\link[r.jive]{jive}});
+each subsequent entry contains the consensus clustering results, as in "consensus" method.
+}
 }
 \description{
 This function performs cell-type-specific clustering on input DNAm matrix.
 }
 \details{
-This function helps to do cell type specific clustering with 2 optional methods:
+This function helps to do cell-type-specific clustering with 2 optional methods:
 \itemize{
-\item {jive}: By doing JIVE analysis first with input matrices over different sets of DMCs unique to different cell types
-      or shared by multiple cell types, one can obtain joint variation shared by the input DMC sets and individual variation unique to each DMC set.
-      Note that when using "jive" method, there should be \strong{NO COMMON} CpG probes in each entry of dmct.lv.
+\item {jive}: By doing JIVE analysis first on the input matrices over different sets of DMCTs, one can obtain joint variation shared by the input DMCT sets
+      and individual variation unique to each DMCT set.
+      Note that when using "jive" method, there should be \strong{no overlapping} CpGs between every two entries of dmct.lv.
       Later consensus clustering will be performed on the joint variation matrix and different individual variation matrices derived from jive analysis.
       With this method the function returns a list with length equal to `length(dmct.lv) + 2`:
-      The 1st entry is the jive analysis result, and the rest are the clustering results using joint variation (the 2nd entry) and individual variation matrices.
+      The 1st entry contains the jive analysis result, and the rest contain the clustering results using joint variation (the 2nd entry) and individual variation matrices.
 \item {consensus}: When using this method,
-it is not necessary for the CpGs within each entry of dmct.lv to be completely non-overlapping.
-
+it is not necessary for the CpGs within each entry of "dmct.lv" to be completely non-overlapping. Consensus clustering will be performed directly on the input data matrix.
+With this method the function returns a list with the same length as "dmct.lv", with each entry containing the consensus clustering results using different DMCT sets in "dmct.lv".
 }
 }
 \examples{

@@ -7,11 +7,11 @@
 GenResidualMat(beta.m, estCTF.m, standardize = T, ncores = 4)
 }
 \arguments{
-\item{beta.m}{A beta matrix, with rows representing CpG sites and columns representing samples.}
+\item{beta.m}{A beta value matrix, with rows representing CpG sites and columns representing samples.}
 
-\item{estCTF.m}{A matrix of cell type fractions, with columns representing cell types and rows representing samples.}
+\item{estCTF.m}{A matrix of cell-type fractions, with columns representing cell types and rows representing samples.}
 
-\item{standardize}{A boolean value to determine whether to do standardization (zero-mean and unit-variance) for the residual matrix.
+\item{standardize}{A boolean value to determine whether to apply z-score standardization (zero-mean and unit-variance) to the residual matrix.
 Default is TRUE.}
 
 \item{ncores}{The number of cores to use, i.e. at most how many child processes will be run simultaneously.}
@@ -21,7 +21,7 @@ A (standardized if the parameter "standardized" is set to TRUE) residual matrix.
 }
 \description{
 This is a function to regress out estimated cell type fractions from the original DNAm data,
-i.e. the beta matrix.
+i.e. the beta value matrix.
 }
 \examples{
 \dontrun{
