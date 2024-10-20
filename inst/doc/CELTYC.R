@@ -90,16 +90,23 @@ plot(surv.res.l[[1]]$survfit, col = c("firebrick","dodgerblue","orange"),lwd=2, 
 text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[1]," Chisq P=",signif(surv.res.l[[1]]$`pair-Pval`[1],2)),cex = 0.9)
 text(x = 1400,y=0.15,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[2]," Chisq P=",signif(surv.res.l[[1]]$`pair-Pval`[2],2)),cex = 0.9)
 text(x = 1400,y=0.2,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[3]," Chisq P=",signif(surv.res.l[[1]]$`pair-Pval`[3],2)),cex = 0.9)
+legend("topright",legend=paste0("cl",1:3),col=c("firebrick","dodgerblue","orange"),
+       lty = 1,inset = 0.05,cex = 0.9,bty="n")
+
 
 # for clustering results using Hep DMCTs:
 plot(surv.res.l[[2]]$survfit, col = c("#FF8080","#80FF80","#8080FF"),lwd=2, mark.time=TRUE, xlab="Years", ylab="OS",xscale = 365.25,cex.lab=0.8,cex.axis=0.8,mgp = c(1, 0.5, 0),tck = -0.03,main="Hep clusters",cex.main=1) 
 text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[1]," Chisq P=",signif(surv.res.l[[2]]$`pair-Pval`[1],2)),cex = 0.9)
 text(x = 1400,y=0.15,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[2]," Chisq P=",signif(surv.res.l[[2]]$`pair-Pval`[2],2)),cex = 0.9)
 text(x = 1400,y=0.2,label=paste0(names(surv.res.l[[1]]$`pair-Pval`)[3]," Chisq P=",signif(surv.res.l[[2]]$`pair-Pval`[3],2)),cex = 0.9)
+legend("topright",legend=paste0("cl",1:3),col=c("#FF8080","#80FF80","#8080FF"),
+       lty = 1,inset = 0.05,cex = 0.9,bty="n")
 
 # for clustering results using EC DMCTs:
 plot(surv.res.l[[3]]$survfit, col =  c("#F06000","#408030"),lwd=2, mark.time=TRUE, xlab="Years", ylab="OS",xscale = 365.25,cex.lab=0.8,cex.axis=0.8,mgp = c(1, 0.5, 0),tck = -0.03,main="EC clusters",cex.main=1) 
 text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[3]]$`pair-Pval`)[1]," Chisq P=",signif(surv.res.l[[2]]$`pair-Pval`[1],2)),cex = 0.9)
+legend("topright",legend=paste0("cl",1:2),col=c("#F06000","#408030"),
+       lty = 1,inset = 0.05,cex = 0.9,bty="n")
 
 
 ## ----chunk8, eval=F,echo=T----------------------------------------------------
@@ -116,6 +123,8 @@ survfit.o <- survfit(surv.o ~ jive.clust.v)
 par(mar=c(2,2,2,2))
 plot(survfit.o, col =  c("coral","#CF30CF"),lwd=2, mark.time=TRUE, xlab="Years", ylab="OS",xscale = 365.25,cex.lab=0.8,cex.axis=0.8,mgp = c(1, 0.5, 0),tck = -0.03,main="JIVE IV Lym clusters",cex.main=1)
 text(x = 1400,y=0.1,label=paste0("cl 1,2 Chisq P=",signif(chisq.pval,2)),cex = 0.9)
+legend("topright",legend=paste0("cl",1:2),col=c("coral","#CF30CF"),
+       lty = 1,inset = 0.05,cex = 0.9,bty="n")
 
 ## ----sessionInfo, eval=T, echo=T----------------------------------------------
 sessionInfo()
