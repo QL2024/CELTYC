@@ -24,21 +24,16 @@ data("LIHC_data") # load the data used in the following analysis
 #  
 #  cov.mod.use <- model.matrix(~sex.v[-na.idx]+age.v[-na.idx]) # exclude the confounding effect of age and sex
 #  celldmc.o <- CellDMC(beta.m = bmiq.m[,-na.idx], pheno.v=phe.v[-na.idx], frac.m  = estF.m[-na.idx,], mc.cores = 40,cov.mod = cov.mod.use)
-#  dmct.lv <- list() # save DMCTs for each cell type
-#  for(ct in colnames(celldmc.o[["dmct"]])[2:ncol(celldmc.o[["dmct"]])]){
-#      dmct.lv[[ct]] <-  rownames(celldmc.o[["dmct"]])[which(celldmc.o[["dmct"]][,ct]!=0)]
-#  }
-#  dmct.res <- list(celldmc_res=celldmc.o,dmct=dmct.lv)
-#  
+#  dmct.lv <- GetDMCT(celldmc.o,nDMCT = 100,specific = T,nSpDMCT = 100,common = T,nCT = 3,nCmDMCT = 100) # nSpDMCT is the threshold to save DMCTs specific to a particular cell type, and nCmDMCT is the threshold to save DMCTs common to nCT cell types
 
 ## ----chunk4, message=F--------------------------------------------------------
 library(SuperExactTest)
-supertest.o <- supertest(LIHC_data$allDMCT,n=403197)
+supertest.o <- supertest(LIHC_data$allDMCT$dmct,n=403197)
 plot(supertest.o,"landscape",sort.by = "size",color.scale.cex = 0.8,overlap.size.cex = 0.7,cex=0.8)
 
 ## ----chunk5,echo=T------------------------------------------------------------
 res.m <- GenResidualMat(LIHC_data$DNAm,estCTF.m = LIHC_data$estF,standardize = T,ncores = 40) # regress out CTFs from DNAm matrix and get standardized residual matrix
-CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_data$selDMCT[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
+CELTYC.results.l <- DoCELTYC(res.m,method = "consensus",maxK = 3,dmct.lv = LIHC_data$allDMCT$spec[c("Lym","Hep","EC")],title = "cluster-test") # do consensus clustering on standardized residual matrix over DMCTs specific to lymphocytes, hepatocytes and endothelial cells
 
 ## ----chunk6,message=F---------------------------------------------------------
 library(ComplexHeatmap)
@@ -108,7 +103,8 @@ text(x = 1400,y=0.1,label=paste0(names(surv.res.l[[3]]$`pair-Pval`)[1]," Chisq P
 
 
 ## ----chunk8, eval=F,echo=T----------------------------------------------------
-#  jive.results.l <- DoCELTYC(data.m = res.m,method = "jive",maxK = 3,dmct.lv = LIHC_data$selDMCT,title = "cluster-test")
+#  selDMCT.lv <- c(LIHC_data$allDMCT$spec[c("Lym","Hep","EC")],LIHC_data$allDMCT$comm["EC_Hep_Lym"]) # extract the cell-type specific DMCTs and the common DMCTs
+#  jive.results.l <- DoCELTYC(data.m = res.m,method = "jive",maxK = 3,dmct.lv = selDMCT.lv,title = "cluster-test")
 #  jive.IV.lym.clust.l <- jive.results.l$Lym # extract the clustering results on JIVE-derived individual variation matrix for lymphocyte-specific DMCTs
 
 ## ----chunk9, eval=T,echo=T----------------------------------------------------
