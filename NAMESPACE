@@ -2,6 +2,7 @@
 
 export(DoCELTYC)
 export(GenResidualMat)
+export(GetDMCT)
 import(ConsensusClusterPlus)
 import(parallel)
 import(r.jive)

@@ -8,9 +8,9 @@
 #' @aliases DoCELTYC
 #'
 #' @param data.m A DNAm matrix on which to perform cell-type-specific clustering. A standardized residual matrix adjusted for cell type fractions is recommended here, but this is optional.
-#' @param dmct.lv A list object where each entry is a character vector of DMCTs (CpG probes).
+#' @param dmct.lv A list object where each entry is a character vector of DMCTs, i.e. phenotype associated differentially methylated CpGs altered in one or more cell types, which can be obtained from the output of function EpiDISH::CellDMC. 
 #' The DMCT vector can be DMCTs for a specific cell type or a set of DMCTs shared among different cell types.
-#' Please note that each entry should be assigned a name.
+#' Please note that each entry should be assigned a name. The list of DMCTs can be retrieved by inputting the result of CellDMC into our function GetDMCT.
 #'
 #' @param method Character value. "jive": do JIVE analysis (with \code{\link[r.jive]{jive}}) on the input matrix first, and then do consensus clustering;
 #' "consensus": do consensus clustering directly on the input matrix.

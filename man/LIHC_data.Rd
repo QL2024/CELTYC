@@ -17,13 +17,12 @@ A list with the following entries:
   \item{estF}{
   A matrix of estimated cell-type fractions for LIHC DNAm data, with rows labeling cancer samples and columns labeling cell types.}
   \item{allDMCT}{
-  A list with 5 entries. Each entry is a vector of DMCTs for a cell type.
+  A list object, containing 3 sublists of different DMCT sets.
+  \itemize{
+  \item dmct: A list object. Each entry is a vector of DMCTs altered in a cell type. The name of each entry is the cell type.
+  \item spec: A list object. Each entry is a vector of DMCTs specific to a cell type. The name of each entry is the cell type.
+  \item comm: A list object. Each entry is a vector of DMCTs common to 3 cell types. The name of each entry is the combination of 3 cell types.
   }
-  \item{selDMCT}{
-  A list with each entry corresponding to a set of DMCTs.
-  The entries labeled "Lym", "Hep", and "EC" contain DMCTs that
-  are exclusive to individual cell types: lymphocytes, hepatocytes, and endothelial cells, respectively.
-  The entry labeled "common" contain DMCTs that are shared among lymphocytes, hepatocytes, and endothelial cells.
   }
   \item{heatmap}{
   A heatmap object (\code{\link[ComplexHeatmap]{Heatmap-class}}),
